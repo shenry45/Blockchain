@@ -113,8 +113,8 @@ blockchain = Blockchain()
 
 @app.route('/mine', methods=['POST'])
 def mine():
+    print('attempting')
     data = request.get_json()
-    print(data)
 
     if data is None or "proof" not in data and "id" not in data:
         response = {
@@ -125,19 +125,25 @@ def mine():
 
     # Run the proof of work algorithm to get the next proof
     block = blockchain.last_block
+    block_string = json.dumps(block, sort_keys=True)
 
-    if blockchain.valid_proof(data["id"], data["proof"]):
+    if blockchain.valid_proof(block_string, data["proof"]):
+        print('new block forging')
         # Forge the new Block by adding it to the chain with the proof
-        block_hash = blockchain.hash(block)
-        blockchain.new_block(data["proof"], block_hash)
+        previous_hash = blockchain.hash(block)
+        blockchain.new_block(data["proof"], previous_hash)
 
         response = {
             'message': 'New Block Forged'
         }
 
-        return jsonify(response), 200
     else:
-        return jsonify({'message': 'Proof unsuccessful. Try again.'}), 200
+        print('failed')
+        response = {
+            'message': 'Proof unsuccessful. Try again.'
+        }
+    
+    return jsonify(response), 200
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
@@ -147,7 +153,7 @@ def full_chain():
     }
     return jsonify(response), 200
 
-@app.route('/last-block', methods=['GET'])
+@app.route('/last_block', methods=['GET'])
 def last_block():
     response = {
         'block': blockchain.last_block

@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         node = sys.argv[1]
     else:
-        node = "http://localhost:5000"
+        node = "http://127.0.0.1:5030"
 
     # Load ID
     f = open("my_id.txt", "r")
@@ -67,8 +67,10 @@ if __name__ == '__main__':
             print(r)
             break
 
+        print('Attacking block...')
+
         # Get the block from `data` and use it to look for a new proof
-        new_proof = proof_of_work(data.block)
+        new_proof = proof_of_work(data["block"])
 
         # When found, POST it to the server {"proof": new_proof, "id": id}
         post_data = {"proof": new_proof, "id": id}
@@ -77,7 +79,7 @@ if __name__ == '__main__':
         data = r.json()
 
         # TODO: If the server responds with a 'message' 'New Block Forged'
-        if data.message == 'New Block Forged':
+        if data["message"] == 'New Block Forged':
             # add 1 to the number of coins mined and print it.
             coin_counter += 1
             print(coin_counter)
