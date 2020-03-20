@@ -45,6 +45,21 @@ class Blockchain(object):
         # Return the new block
         return block
 
+    def new_transaction(self, sender, recipient, amount):
+        new_transaction = {
+            'timestamp': time(),
+            'sender': sender,
+            'recipient': recipient,
+            'amount': amount
+        }
+
+        self.current_transactions.append(new_transaction)
+
+        # get last block and show it will be added to following block
+        future_index = self.last_block['index'] + 1
+
+        return future_index
+
     def hash(self, block):
         """
         Creates a SHA-256 hash of a Block
@@ -100,6 +115,7 @@ class Blockchain(object):
     @property
     def last_block(self):
         return self.chain[-1]
+
 
 # Instantiate our Node
 app = Flask(__name__)
@@ -158,6 +174,26 @@ def last_block():
     response = {
         'block': blockchain.last_block
     }
+    return jsonify(response), 200
+
+@app.route('/transactions/new', methods=['POST'])
+def new_transaction():
+    data = request.get_json()
+    
+    if "sender" not in data and "recipient" not in data and "amount" not in data:
+        response = {
+            "message": "All required fields not found."
+        }
+
+        return jsonify(response), 400
+    
+    # add transaction to blockchain
+    index = blockchain.new_transaction(sender=data["sender"], recipient=data["recipient"], amount=data["amount"])
+    # report added tranasction
+    response = {
+        "message": f"Your transaction will be in block {index}"
+    }
+
     return jsonify(response), 200
 
 

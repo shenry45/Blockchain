@@ -85,4 +85,4 @@ if __name__ == '__main__':
             print(coin_counter)
         else:
             # print the message from the server.
-            print(data.message)
+            print(data["message"])
